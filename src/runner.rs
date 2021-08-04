@@ -173,11 +173,13 @@ fn render_files_test(desc: &FilesTestDesc, rendered: &mut Vec<TestDescAndFn>) {
             let desc = TestDescAndFn {
                 desc: TestDesc {
                     name: TestName::DynTestName(test_name),
+                    test_type: crate::test_type(desc.source_file),
                     ignore,
                     should_panic: ShouldPanic::No,
                     // Cannot be used on stable: https://github.com/rust-lang/rust/issues/46488
                     allow_fail: false,
-                    test_type: crate::test_type(desc.source_file),
+                    compile_fail: false,
+                    no_run: false,
                 },
                 testfn,
             };
@@ -218,10 +220,12 @@ fn render_data_test(desc: &DataTestDesc, rendered: &mut Vec<TestDescAndFn>) {
         let desc = TestDescAndFn {
             desc: TestDesc {
                 name: TestName::DynTestName(case_name),
+                test_type: crate::test_type(desc.source_file),
                 ignore: desc.ignore,
                 should_panic: ShouldPanic::No,
                 allow_fail: false,
-                test_type: crate::test_type(desc.source_file),
+                compile_fail: false,
+                no_run: false,
             },
             testfn,
         };
@@ -402,11 +406,14 @@ fn render_test_descriptor(
             rendered.push(TestDescAndFn {
                 desc: TestDesc {
                     name: TestName::StaticTestName(real_name(desc.name)),
+                    test_type: crate::test_type(desc.source_file),
                     ignore: desc.ignore,
                     should_panic: desc.should_panic.into(),
-                    // FIXME: should support!
+                    // FIXME: should support, via a similar mechanism to `ignore`.
                     allow_fail: false,
-                    test_type: crate::test_type(desc.source_file),
+                    // These two are irrelevant for datatest, they only really make sense for doctests.
+                    compile_fail: false,
+                    no_run: false,
                 },
                 testfn: TestFn::StaticTestFn(desc.testfn),
             })
